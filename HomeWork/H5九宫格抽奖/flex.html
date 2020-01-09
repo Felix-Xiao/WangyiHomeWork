@@ -44,7 +44,7 @@
         height: 100%;
         border: 1px solid black;
         size: 20;
-        background: rgb(248, 211, 141);
+        background: rgb(252, 251, 250);
         line-height: 300px;
         font-size: 50;
         color: black;
@@ -58,43 +58,101 @@
 <body>
     <div>
         <div class="con">
-            <div style="flex-grow: 1;order:1;">华为</div>
-            <div style="flex-grow: 2;order:2;">iPhone X</div>
-            <div style="flex-grow: 1;order:3;">谢谢惠顾</div>
+            <div id="div1" style="flex-grow: 1;order:1;">华为</div>
+            <div id="div2" style="flex-grow: 2;order:2;">iPhone X</div>
+            <div id="div3" style="flex-grow: 1;order:3;">谢谢惠顾</div>
         </div>
         <div class="con">
-            <div style="flex-grow: 1;order:1;">手环</div>
-            <div id = "divBut" style="flex-grow: 2;order:2;" onclick="start()">开始</div>
-            <div style="flex-grow: 1;order:3;">小熊抱枕</div>
+            <div id="div4" style="flex-grow: 1;order:1;">手环</div>
+            <div id="div5" style="flex-grow: 2;order:2;" onclick="start()">开始</div>
+            <div id="div6" style="flex-grow: 1;order:3;">小熊抱枕</div>
         </div>
         <div class="con">
-            <div style="flex-grow: 1;order:1;">格力冰箱</div>
-            <div style="flex-grow: 2;order:2;">电风扇</div>
-            <div style="flex-grow: 1;order:3;">小度音箱</div>
+            <div id="div7" style="flex-grow: 1;order:1;">格力冰箱</div>
+            <div id="div8" style="flex-grow: 2;order:2;">电风扇</div>
+            <div id="div9" style="flex-grow: 1;order:3;">小度音箱</div>
         </div>
     </div>
     <script>
-        var div = document.getElementById("divBut");
-        // div.onclick = function(){
-        //     alert('haha')
-        // }
-        // div.addEventListener("click", function(){
-        //     alert("haha");
-        // })
-        function start(){
+        //https://www.cnblogs.com/CccK-html/p/11432740.html
+        var prize = [
+            { name: "华为", odds: 0.1 },
+            { name: "iPhone X", odds: 0.1 },
+            { name: "谢谢惠顾", odds: 0.3 },
+            { name: "手环", odds: 0.1 },
+            { name: "小熊抱枕", odds: 0.1 },
+            { name: "格力冰箱", odds: 0.1 },
+            { name: "电风扇", odds: 0.1 },
+            { name: "小度音箱", odds: 0.1 }];
+
+        window.onload = setPrize(prize);
+
+        function setPrize(prize) {
+            var len = prize.length;
+            for (let i = 0; i < 8; i++) {
+                let m = i + 1;
+                if (i > 3) {
+                    m = i + 2;
+                }
+                let divName = "div" + m;
+                let div = document.getElementById(divName);
+                if (i <= len) {
+                    div.innerHTML = prize[i].name;
+                } else {
+                    div.innerHTML = "谢谢惠顾";
+                }
+            }
+            document.getElementById("div5").innerHTML = "开始";
+        }
+        function start() {
             console.log('开始抽奖');
+            var lastPrizeIndex = parseInt(random(prize));
+            var divIndex = lastPrizeIndex + 1;
+            if (lastPrizeIndex > 3) {
+                divIndex = lastPrizeIndex + 2;
+            }
+            let divPrize = document.getElementById('div' + divIndex);
+            for (let i = 0; i < 8; i++) {
+                let m = i + 1;
+                if (i > 3) {
+                    m = i + 2;
+                }
+                let divName = "div" + m;
+                
+                setInterval(function(divName){
+                    let div = document.getElementById(divName);
+                    div.style.background = "rgb(248, 211, 141)";
+                }, 200)
+                
+            }
+            divPrize.style.background = "rgb(248, 211, 141)";
+            
+            console.log(prize[lastPrizeIndex]);
+        }
+        function random(prize) {
+            var total = 0;
+            var total1 = 0;
+            for (var i in prize) {
+                total = total + prize[i].odds;
+            }
+            var random = Math.random();
+            for (var i in prize) {
+                total1 = total1 + prize[i].odds;
+                if (total1 > random * total) {
+                    return i;
+                }
+            }
         }
 
         // number 基于初始的大小 围绕中心点 XY
         // var scale = document.querySelector(".scale");
-        var scale = document.getElementById("divBut");
-        scale.addEventListener("touchstart", ()=>{
+        var scale = document.getElementById("div5");
+        scale.addEventListener("touchstart", () => {
             // scale.style.WebkitTransform = "scale(1.2, 2)";
-            scale.style.WebkitTransform = "rotate(360deg) scale(1.5)";
+            scale.style.WebkitTransform = "rotate(360deg) scale(1)";
         })
-        function random(){
-            
-        }
+
+
 
     </script>
 </body>
