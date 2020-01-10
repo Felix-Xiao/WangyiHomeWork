@@ -58,19 +58,19 @@
 <body>
     <div>
         <div class="con">
-            <div id="div1" style="flex-grow: 1;order:1;">华为</div>
-            <div id="div2" style="flex-grow: 2;order:2;">iPhone X</div>
-            <div id="div3" style="flex-grow: 1;order:3;">谢谢惠顾</div>
+            <div id="div1" class="prize" style="flex-grow: 1;order:1;">华为</div>
+            <div id="div2" class="prize" style="flex-grow: 2;order:2;">iPhone X</div>
+            <div id="div3" class="prize" style="flex-grow: 1;order:3;">谢谢惠顾</div>
         </div>
         <div class="con">
-            <div id="div4" style="flex-grow: 1;order:1;">手环</div>
-            <div id="div5" style="flex-grow: 2;order:2;" onclick="start()">开始</div>
-            <div id="div6" style="flex-grow: 1;order:3;">小熊抱枕</div>
+            <div id="div4" class="prize" style="flex-grow: 1;order:1;">手环</div>
+            <div id="div5" class="startBtn" style="flex-grow: 2;order:2;" onclick="start()">开始</div>
+            <div id="div6" class="prize" style="flex-grow: 1;order:3;">小熊抱枕</div>
         </div>
         <div class="con">
-            <div id="div7" style="flex-grow: 1;order:1;">格力冰箱</div>
-            <div id="div8" style="flex-grow: 2;order:2;">电风扇</div>
-            <div id="div9" style="flex-grow: 1;order:3;">小度音箱</div>
+            <div id="div7" class="prize" style="flex-grow: 1;order:1;">格力冰箱</div>
+            <div id="div8" class="prize" style="flex-grow: 2;order:2;">电风扇</div>
+            <div id="div9" class="prize" style="flex-grow: 1;order:3;">小度音箱</div>
         </div>
     </div>
     <script>
@@ -84,61 +84,75 @@
             { name: "格力冰箱", odds: 0.1 },
             { name: "电风扇", odds: 0.1 },
             { name: "小度音箱", odds: 0.1 }];
-
+        var s = 0, stopTimer, count = 0, lastPrizeIndex = 0;
         window.onload = setPrize(prize);
-
+        //根据传入数组，进行奖品设置
         function setPrize(prize) {
-            var len = prize.length;
+            var divList = document.getElementsByClassName("prize");
             for (let i = 0; i < 8; i++) {
-                let m = i + 1;
-                if (i > 3) {
-                    m = i + 2;
-                }
-                let divName = "div" + m;
-                let div = document.getElementById(divName);
-                if (i <= len) {
-                    div.innerHTML = prize[i].name;
+                if (i <= prize.length) {
+                    divList[i].innerHTML = prize[i].name;
                 } else {
-                    div.innerHTML = "谢谢惠顾";
+                    divList[i].innerHTML = "谢谢惠顾";
                 }
             }
             document.getElementById("div5").innerHTML = "开始";
         }
         function start() {
             console.log('开始抽奖');
-            var lastPrizeIndex = parseInt(random(prize));
-            var divIndex = lastPrizeIndex + 1;
-            if (lastPrizeIndex > 3) {
-                divIndex = lastPrizeIndex + 2;
-            }
-            let divPrize = document.getElementById('div' + divIndex);
-            for (let i = 0; i < 8; i++) {
-                let m = i + 1;
-                if (i > 3) {
-                    m = i + 2;
-                }
-                let divName = "div" + m;
-                
-                setInterval(function(divName){
-                    let div = document.getElementById(divName);
-                    div.style.background = "rgb(248, 211, 141)";
-                }, 200)
-                
-            }
-            divPrize.style.background = "rgb(248, 211, 141)";
-            
+            count = 0;
+            //根据奖品和对应的概率，计算中奖结果
+            lastPrizeIndex = parseInt(random(prize));
+            stopTimer = setInterval(function(){
+                active();
+                }, 300);
+            // divPrize.style.background = "rgb(248, 211, 141)";
+            // divPrize.style.WebkitTransform = "rotate(360deg) scale(1.3)";
+            console.log(lastPrizeIndex);
             console.log(prize[lastPrizeIndex]);
         }
+
+        function active() {
+            var divList = document.getElementsByClassName("prize");
+            var change = [0, 1, 2, 4, 7, 6, 5, 3];
+            for (let i = 0; i < 8; i++) {
+                divList[i].style.background = "white"
+            }
+            //转盘盘转到时，显示粉色
+            divList[change[s]].style.background = "pink"
+
+            count++;
+            //抽奖中，快速转动
+            if (count === 10 ) {
+                clearInterval(stopTimer);
+                stopTimer = setInterval(active, 100);
+            }
+            //抽奖即将结束，转动变慢
+            if (count === 20) {
+                clearInterval(stopTimer);
+                stopTimer = setInterval(active, 300);
+            }
+            //轮转30次后，确定抽奖结果
+            if (count > 30 && change[s] === lastPrizeIndex) {
+                clearInterval(stopTimer);
+            }
+            s++;
+            if (s === 8) {
+                s = 0;
+            }
+        }
+
+        //根据奖品和对应的概率，计算中奖结果（奖品概率占总概率的份额越多，越容易中奖，中奖概率可以大于1）
         function random(prize) {
             var total = 0;
-            var total1 = 0;
+            var currentTotal = 0;
             for (var i in prize) {
                 total = total + prize[i].odds;
             }
             var random = Math.random();
             for (var i in prize) {
-                total1 = total1 + prize[i].odds;
-                if (total1 > random * total) {
+                currentTotal = currentTotal + prize[i].odds;
+                if (currentTotal > random * total) {
                     return i;
                 }
             }
