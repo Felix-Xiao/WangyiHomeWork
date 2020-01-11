@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="utf-8">
-    <title>标题</title>
-    <meta name="keywords" content="关键字" />
-    <meta name="description" content="网页描述" />
+    <title>九宫格抽奖</title>
+    <meta name="keywords" content="九宫格抽奖" />
+    <meta name="description" content="九宫格抽奖" />
 </head>
 <style>
     * {
@@ -23,20 +23,8 @@
         width: 100%;
         border: 1px solid black;
         display: flex;
-        /* 换行 默认值nowarp 不换行*/
-        /* 换行 第一行放下面 */
-        /* flex: wrap-reverse; */
         flex-wrap: nowarp;
         line-height: 100px;
-        /* 排列方向 */
-        /* flex-direction: row-reverse; */
-        /* 交叉轴对齐方式 X */
-        /* align-items:flex-end; */
-        /* 交叉轴对齐方式 Y */
-        /* justify-content: flex-end; */
-
-        /*多跟轴线对齐方式 一根轴线 */
-        /* align-content: flex-start; */
     }
 
     .con>div {
@@ -51,7 +39,6 @@
         text-align: center;
         align-content: center;
         transition: all .5s;
-        /* margin: auto; */
     }
 </style>
 
@@ -74,7 +61,19 @@
         </div>
     </div>
     <script>
-        //https://www.cnblogs.com/CccK-html/p/11432740.html
+        //超过8个奖品不显示，最后一项{ cheatPrize: "谢谢惠顾" }]是必然抽中的奖品，可以不设置
+        // var prize = [
+        //     { name: "华为", odds: 0.1 },
+        //     { name: "iPhone X", odds: 0.1 },
+        //     { name: "谢谢惠顾", odds: 0.3 },
+        //     { name: "手环", odds: 0.1 },
+        //     { name: "小熊抱枕", odds: 0.1 },
+        //     { name: "格力冰箱", odds: 0.1 },
+        //     { name: "电风扇", odds: 0.1 },
+        //     { name: "小度音箱", odds: 0.1 },
+        //     { cheatPrize: "谢谢惠顾" }];
+
+        //奖品数组，超过8个奖品不显示
         var prize = [
             { name: "华为", odds: 0.1 },
             { name: "iPhone X", odds: 0.1 },
@@ -83,14 +82,17 @@
             { name: "小熊抱枕", odds: 0.1 },
             { name: "格力冰箱", odds: 0.1 },
             { name: "电风扇", odds: 0.1 },
-            { name: "小度音箱", odds: 0.1 }];
+            { name: "小度音箱", odds: 0.1}];
+
         var s = 0, stopTimer, count = 0, lastPrizeIndex = 0;
+
         window.onload = setPrize(prize);
+
         //根据传入数组，进行奖品设置
         function setPrize(prize) {
             var divList = document.getElementsByClassName("prize");
             for (let i = 0; i < 8; i++) {
-                if (i <= prize.length) {
+                if (i <= prize.length && prize[i].name) {
                     divList[i].innerHTML = prize[i].name;
                 } else {
                     divList[i].innerHTML = "谢谢惠顾";
@@ -98,20 +100,26 @@
             }
             document.getElementById("div5").innerHTML = "开始";
         }
+
+        //开始抽奖
         function start() {
+            //当抽奖进行中时，点击无效
+            if (count != 0) {
+                console.log("抽奖还没有结束！");
+                alert("抽奖还没有结束！");
+                return;
+            }
             console.log('开始抽奖');
-            count = 0;
             //根据奖品和对应的概率，计算中奖结果
             lastPrizeIndex = parseInt(random(prize));
-            stopTimer = setInterval(function(){
+            //抽奖动画
+            stopTimer = setInterval(function () {
                 active();
-                }, 300);
-            // divPrize.style.background = "rgb(248, 211, 141)";
-            // divPrize.style.WebkitTransform = "rotate(360deg) scale(1.3)";
-            console.log(lastPrizeIndex);
-            console.log(prize[lastPrizeIndex]);
+            }, 300);
+            console.log('最终奖品是：' + prize[lastPrizeIndex].name);
         }
 
+        //抽奖动画
         function active() {
             var divList = document.getElementsByClassName("prize");
             var change = [0, 1, 2, 4, 7, 6, 5, 3];
@@ -122,19 +130,25 @@
             divList[change[s]].style.background = "pink"
 
             count++;
-            //抽奖中，快速转动
-            if (count === 10 ) {
+            //抽奖开始，快速转动慢慢变快
+            if (count < 10) {
+                clearInterval(stopTimer);
+                stopTimer = setInterval(active, 300 - count * 20);
+            }
+            //抽奖中，快速转动最快
+            if (count > 10 && count < 20) {
                 clearInterval(stopTimer);
                 stopTimer = setInterval(active, 100);
             }
             //抽奖即将结束，转动变慢
-            if (count === 20) {
+            if (count > 20 && count < 30) {
                 clearInterval(stopTimer);
-                stopTimer = setInterval(active, 300);
+                stopTimer = setInterval(active, 100 + (count - 20) * 50);
             }
             //轮转30次后，确定抽奖结果
             if (count > 30 && change[s] === lastPrizeIndex) {
                 clearInterval(stopTimer);
+                count = 0;
             }
             s++;
             if (s === 8) {
@@ -142,8 +156,17 @@
             }
         }
 
-        //根据奖品和对应的概率，计算中奖结果（奖品概率占总概率的份额越多，越容易中奖，中奖概率可以大于1）
+        //根据奖品和对应的概率，计算中奖结果（奖品概率占总概率的份额越多，越容易中奖，传入的数值可以大于1）
         function random(prize) {
+            //设置必中奖项
+            var cheatPrize = prize[prize.length - 1].cheatPrize;
+            if (cheatPrize) {
+                for (var i in prize) {
+                    if (cheatPrize === prize[i].name) {
+                        return i;
+                    }
+                }
+            }
             var total = 0;
             var currentTotal = 0;
             for (var i in prize) {
@@ -157,16 +180,6 @@
                 }
             }
         }
-
-        // number 基于初始的大小 围绕中心点 XY
-        // var scale = document.querySelector(".scale");
-        var scale = document.getElementById("div5");
-        scale.addEventListener("touchstart", () => {
-            // scale.style.WebkitTransform = "scale(1.2, 2)";
-            scale.style.WebkitTransform = "rotate(360deg) scale(1)";
-        })
-
-
 
     </script>
 </body>
